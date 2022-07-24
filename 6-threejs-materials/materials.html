@@ -1,0 +1,178 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ThreeJS</title>
+		<script src="build/three.js"></script>
+		<script src="./examples/js/controls/OrbitControls.js"></script>
+		<script src="lights.js"></script>
+		<script src="lib/stats.js"></script>
+		<script src="lib/dat.gui.js"></script>
+	</head>
+	<body>
+		<div id="Stats-output"></div>
+
+		<div id="Dat-output"></div>
+
+		<script>
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera(
+				75,
+				window.innerWidth / window.innerHeight,
+				0.1,
+				1000
+			);
+			camera.position.set(3, 5, 3);
+
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+			document.body.appendChild(renderer.domElement);
+
+			// Prologue controls
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+			// Show axis
+			var axes = new THREE.AxesHelper(5);
+			scene.add(axes);
+
+			const planeGeometry = new THREE.PlaneGeometry(10, 10);
+			const planeMaterial = new THREE.MeshPhongMaterial({
+				color: 0x1f1f1f,
+				side: THREE.DoubleSide,
+			});
+			const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+			plane.position.set(0, 0, 0);
+			plane.rotation.x = Math.PI / 2;
+			plane.receiveShadow = true;
+			scene.add(plane);
+
+			const spehreGeometry1 = new THREE.SphereGeometry(1, 100, 10);
+			const spehereMaterial1 = new THREE.MeshLambertMaterial({
+				color: 0x1a99d9,
+			});
+			const sphere1 = new THREE.Mesh(spehreGeometry1, spehereMaterial1);
+			sphere1.position.set(-4, 1, -4);
+			sphere1.castShadow = true;
+			scene.add(sphere1);
+
+			const spehreGeometry2 = new THREE.SphereGeometry(1, 100, 100);
+			const spehereMaterial2 = new THREE.MeshNormalMaterial({
+				color: 0x1a99d9,
+			});
+			const sphere2 = new THREE.Mesh(spehreGeometry2, spehereMaterial2);
+			sphere2.position.set(-2, 1, -4);
+			sphere2.castShadow = true;
+			scene.add(sphere2);
+
+			const spehreGeometry3 = new THREE.SphereGeometry(1, 100, 100);
+			const spehereMaterial3 = new THREE.MeshPhongMaterial({
+				color: 0x1a99d9,
+				shininess: 100,
+			});
+			const sphere3 = new THREE.Mesh(spehreGeometry3, spehereMaterial3);
+			sphere3.position.set(0, 1, -4);
+			sphere3.castShadow = true;
+			scene.add(sphere3);
+
+			const spehreGeometry4 = new THREE.SphereGeometry(1, 100, 100);
+			const spehereMaterial4 = new THREE.MeshDepthMaterial({
+				color: 0x1a99d9,
+				shininess: 100,
+			});
+			const sphere4 = new THREE.Mesh(spehreGeometry4, spehereMaterial4);
+			sphere4.position.set(2, 1, -4);
+			sphere4.castShadow = true;
+			scene.add(sphere4);
+
+			const geometry1 = new THREE.TorusKnotGeometry(0.8, 0.2, 100, 100);
+			const material1 = new THREE.MeshToonMaterial({ color: 0xffff00 });
+			const torusKnot1 = new THREE.Mesh(geometry1, material1);
+			torusKnot1.position.set(-3, 1.5, 0);
+			scene.add(torusKnot1);
+
+			const geometry2 = new THREE.TorusKnotGeometry(0.8, 0.2, 100, 100);
+			const material2 = new THREE.MeshPhysicalMaterial({ color: 0xff1100 });
+			const torusKnot2 = new THREE.Mesh(geometry2, material2);
+			torusKnot2.position.set(0, 1.5, 0);
+			scene.add(torusKnot2);
+
+			const geometry3 = new THREE.TorusKnotGeometry(0.8, 0.2, 100, 100);
+			const material3 = new THREE.MeshMatcapMaterial({ color: 0xffffff });
+			const torusKnot3 = new THREE.Mesh(geometry3, material3);
+			torusKnot3.position.set(3, 1.5, 0);
+			scene.add(torusKnot3);
+
+			/* LIGHTS */
+			// ambient();
+			// directional();
+			// spot();
+			point();
+
+			var render = function () {
+				// createCube();
+
+				renderer.render(scene, camera);
+			};
+
+			/* STATS */
+			var stats = initStats();
+
+			function initStats() {
+				var stats = new Stats();
+				stats.setMode(0);
+				stats.domElement.style.position = "absolute";
+				stats.domElement.style.left = "20px";
+				stats.domElement.style.top = "20px";
+				document.getElementById("Stats-output").appendChild(stats.domElement);
+
+				return stats;
+			}
+
+			/* DAT GUI */
+			var controls = new (function () {})();
+
+			var datGUI = initDat();
+
+			function initDat() {
+				var gui = new dat.GUI();
+				gui.domElement.style.position = "absolute";
+				gui.domElement.style.right = "20px";
+				gui.domElement.style.top = "20px";
+				document.getElementById("Dat-output").appendChild(gui.domElement);
+
+				return gui;
+			}
+
+			/* SPHERE BOUNCING */
+			var step = 0;
+
+			var update = function () {
+				stats.update();
+
+				torusKnot1.rotation.x += 0.01;
+				torusKnot2.rotation.y += 0.01;
+				torusKnot3.rotation.z += 0.01;
+			};
+
+			var GameLoop = function () {
+				update();
+				render();
+
+				requestAnimationFrame(GameLoop);
+			};
+
+			GameLoop();
+
+			window.addEventListener("resize", function () {
+				var width = window.innerWidth;
+				var height = window.innerHeight;
+				renderer.setSize(width, height);
+				camera.aspect = width / height;
+				camera.updateProjectionMatrix();
+			});
+		</script>
+	</body>
+</html>
